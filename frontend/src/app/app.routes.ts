@@ -9,6 +9,11 @@ import { Usuarios } from './pages/usuarios/usuarios';
 import { Catalogo } from './pages/catalogo/catalogo';
 import { Reporte } from './pages/reporte/reporte';
 import { authGuard, guestGuard } from './guards/auth-guard';
+import { Cliente } from './pages/cliente/cliente';
+import { Proveedor } from './pages/proveedor/proveedor';
+import { Venta } from './pages/venta/venta';
+import { Compra } from './pages/compra/compra';
+import { Configuracion } from './pages/configuracion/configuracion';
 
 export const routes: Routes = [
   {
@@ -50,6 +55,26 @@ export const routes: Routes = [
       {
         path: 'usuarios',
         component: Usuarios
+      },
+      {
+        path: 'clientes',
+        component: Cliente
+      },
+      {
+        path: 'proveedores',
+        component: Proveedor
+      },
+      {
+        path: 'ventas',
+        component: Venta
+      },
+      {
+        path: 'compras',
+        component: Compra
+      },
+      {
+        path: 'configuracion',
+        component: Configuracion
       }
     ]
   },
