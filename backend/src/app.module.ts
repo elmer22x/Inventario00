@@ -32,6 +32,10 @@ import { Configuracion } from './configuracion/model/configuracion.model';
 import { ReportesAvanzadosModule } from './reportes-avanzados/reportes-avanzados.module';
 
 
+import { Venta } from './venta/model/venta.model';
+import { VentaDetalle } from './venta/model/venta-detalle.model';
+import { Compra } from './compra/model/compra.model';
+import { CompraDetalle } from './compra/model/compra-detalle.model';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -50,7 +54,7 @@ import { ReportesAvanzadosModule } from './reportes-avanzados/reportes-avanzados
         return opts;
       },
     }),
-    TypeOrmModule.forFeature([Usuario, Categoria, Producto, Movimiento, Cliente, Proveedor, Configuracion]),
+    TypeOrmModule.forFeature([Usuario, Categoria, Producto, Movimiento, Cliente, Proveedor, Configuracion, Venta, VentaDetalle, Compra, CompraDetalle]),
     AuthModule,
     ClienteModule,
     ProveedorModule,
