@@ -14,6 +14,8 @@ import { Proveedor } from './pages/proveedor/proveedor';
 import { Venta } from './pages/venta/venta';
 import { Compra } from './pages/compra/compra';
 import { Configuracion } from './pages/configuracion/configuracion';
+import { ReportesAvanzados } from './pages/reportes-avanzados/reportes-avanzados';
+
 
 export const routes: Routes = [
   {
@@ -75,6 +77,10 @@ export const routes: Routes = [
       {
         path: 'configuracion',
         component: Configuracion
+      },
+      {
+        path: 'reportes-avanzados',
+        component: ReportesAvanzados
       }
     ]
   },

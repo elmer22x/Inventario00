@@ -29,6 +29,8 @@ import { Proveedor } from './proveedor/model/proveedor.model';
 import { CompraModule } from './compra/compra.module';
 import { ConfiguracionModule } from './configuracion/configuracion.module';
 import { Configuracion } from './configuracion/model/configuracion.model';
+import { ReportesAvanzadosModule } from './reportes-avanzados/reportes-avanzados.module';
+
 
 @Module({
   imports: [
@@ -54,7 +56,8 @@ import { Configuracion } from './configuracion/model/configuracion.model';
     ProveedorModule,
     VentaModule,
     CompraModule,
-    ConfiguracionModule
+    ConfiguracionModule,
+    ReportesAvanzadosModule
   ],
   controllers: [
     //AppController, 
