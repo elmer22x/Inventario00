@@ -41,14 +41,16 @@ export class ReportesAvanzadosService {
     if (agrupacion === 'mes') {
       const porMes = new Map<string, number>();
       ventas.forEach(v => {
-        const mes = v.fecha.toISOString().slice(0, 7);
+        const fechaObj = new Date(v.fecha);
+        const mes = fechaObj.toISOString().slice(0, 7);
         porMes.set(mes, (porMes.get(mes) || 0) + Number(v.total));
       });
       datosAgrupados = Array.from(porMes.entries()).map(([periodo, total]) => ({ periodo, total }));
     } else if (agrupacion === 'año') {
       const porAño = new Map<number, number>();
       ventas.forEach(v => {
-        const año = v.fecha.getFullYear();
+        const fechaObj = new Date(v.fecha);
+        const año = fechaObj.getFullYear();
         porAño.set(año, (porAño.get(año) || 0) + Number(v.total));
       });
       datosAgrupados = Array.from(porAño.entries()).map(([periodo, total]) => ({ periodo, total }));
@@ -88,7 +90,7 @@ export class ReportesAvanzadosService {
       .addSelect('SUM(d.subtotal)', 'totalFacturado')
       .groupBy('p.id')
       .addGroupBy('p.nombre')
-      .orderBy('totalVendido', 'DESC')
+      .orderBy('"totalVendido"', 'DESC')
       .limit(limite)
       .getRawMany();
 

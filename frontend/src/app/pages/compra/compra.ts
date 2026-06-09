@@ -172,14 +172,14 @@ export class Compra implements OnInit {
       return;
     }
 
-    const existente = this.nuevaCompra.detalles.find((d: any) => d.productoId === this.productoSeleccionado.id);
+    const existente = this.nuevaCompra.detalles.find((d: any) => d.productoId === this.productoSeleccionado);
     if (existente) {
       existente.cantidad += this.cantidadSeleccionada;
       existente.subtotal = existente.cantidad * existente.precioUnitario;
     } else {
       this.nuevaCompra.detalles.push({
-        productoId: this.productoSeleccionado.id,
-        productoNombre: this.productoSeleccionado.nombre,
+        productoId: this.productoSeleccionado,
+        productoNombre: this.productos.find(p => p.id === this.productoSeleccionado)?.nombre,
         cantidad: this.cantidadSeleccionada,
         precioUnitario: this.precioCompra,
         subtotal: this.cantidadSeleccionada * this.precioCompra,

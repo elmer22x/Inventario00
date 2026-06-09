@@ -55,6 +55,7 @@ export class Venta implements OnInit {
 
   productoSeleccionado: any = null;
   cantidadSeleccionada = 1;
+  precioVenta: number = 0;
 
   // Paginación
   pagina = 0;
@@ -158,6 +159,7 @@ export class Venta implements OnInit {
     };
     this.productoSeleccionado = null;
     this.cantidadSeleccionada = 1;
+    this.precioVenta = 0;
     this.mostrarFormulario = true;
   }
 
@@ -172,22 +174,23 @@ export class Venta implements OnInit {
       return;
     }
 
-    const existente = this.nuevaVenta.detalles.find((d: any) => d.productoId === this.productoSeleccionado.id);
+    const existente = this.nuevaVenta.detalles.find((d: any) => d.productoId === this.productoSeleccionado);
     if (existente) {
       existente.cantidad += this.cantidadSeleccionada;
       existente.subtotal = existente.cantidad * existente.precioUnitario;
     } else {
       this.nuevaVenta.detalles.push({
-        productoId: this.productoSeleccionado.id,
-        productoNombre: this.productoSeleccionado.nombre,
+        productoId: this.productoSeleccionado,
+        productoNombre: this.productos.find(p => p.id === this.productoSeleccionado)?.nombre,
         cantidad: this.cantidadSeleccionada,
-        precioUnitario: this.productoSeleccionado.precio,
-        subtotal: this.cantidadSeleccionada * this.productoSeleccionado.precio,
+        precioUnitario: this.precioVenta,
+        subtotal: this.cantidadSeleccionada * this.precioVenta,
       });
     }
 
     this.productoSeleccionado = null;
     this.cantidadSeleccionada = 1;
+    this.precioVenta = 0;
     this.errorMsg = null;
   }
 

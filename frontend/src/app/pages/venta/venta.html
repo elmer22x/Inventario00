@@ -174,6 +174,18 @@
             [style]="{ width: '100%' }"
           />
         </div>
+        <div class="venta__producto-precio">
+          <label for="venta-precio">Precio</label>
+          <p-inputNumber
+            id="venta-precio"
+            [(ngModel)]="precioVenta"
+            [min]="0"
+            [mode]="'decimal'"
+            [showButtons]="true"
+            [style]="{ width: '100%' }"
+            placeholder="0.00"
+          />
+        </div>
         <div class="venta__producto-btn">
           <button
             pButton
