@@ -10,6 +10,9 @@ import { TagModule } from 'primeng/tag';
 
 import { ClienteService } from '../../services/cliente.service';
 
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+
 @Component({
   selector: 'app-cliente',
   standalone: true,
@@ -21,13 +24,15 @@ import { ClienteService } from '../../services/cliente.service';
     DialogModule,
     TooltipModule,
     TagModule,
+    ToastModule,
   ],
+   providers: [MessageService], 
   templateUrl: './cliente.html',
   styleUrl: './cliente.css',
 })
 export class Cliente implements OnInit {
   private clienteService = inject(ClienteService);
-
+  private messageService = inject(MessageService);
   clientes: any[] = [];
   cargando = true;
   errorMsg: string | null = null;
@@ -159,44 +164,55 @@ export class Cliente implements OnInit {
   }
 
   guardarCliente() {
-    if (!this.nuevoCliente.nombre.trim()) return;
+  if (!this.nuevoCliente.nombre.trim()) return;
 
-    const data = {
-      nombre: this.nuevoCliente.nombre.trim(),
-      documento: this.nuevoCliente.documento.trim() || undefined,
-      email: this.nuevoCliente.email.trim() || undefined,
-      telefono: this.nuevoCliente.telefono.trim() || undefined,
-      direccion: this.nuevoCliente.direccion.trim() || undefined,
-      activo: this.nuevoCliente.activo,
-    };
+  const data = {
+    nombre: this.nuevoCliente.nombre.trim(),
+    documento: this.nuevoCliente.documento.trim() || undefined,
+    email: this.nuevoCliente.email.trim() || undefined,
+    telefono: this.nuevoCliente.telefono.trim() || undefined,
+    direccion: this.nuevoCliente.direccion.trim() || undefined,
+    activo: this.nuevoCliente.activo,
+  };
 
-    if (this.editando) {
-      this.clienteService.update(this.nuevoCliente.id, data).subscribe({
-        next: () => {
-          this.cargarClientes();
-          this.cerrarFormulario();
-        },
-        error: (err) => console.error('Error al actualizar', err),
-      });
-    } else {
-      this.clienteService.create(data).subscribe({
-        next: () => {
-          this.cargarClientes();
-          this.cerrarFormulario();
-        },
-        error: (err) => console.error('Error al crear', err),
-      });
-    }
+  if (this.editando) {
+    this.clienteService.update(this.nuevoCliente.id, data).subscribe({
+      next: () => {
+        this.cargarClientes();
+        this.cerrarFormulario();
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Cliente actualizado correctamente' });
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al actualizar' });
+      },
+    });
+  } else {
+    this.clienteService.create(data).subscribe({
+      next: () => {
+        this.cargarClientes();
+        this.cerrarFormulario();
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Cliente creado correctamente' });
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al crear' });
+      },
+    });
   }
+}
 
   eliminarCliente(id: number) {
-    if (confirm('¿Eliminar este cliente?')) {
-      this.clienteService.delete(id).subscribe({
-        next: () => this.cargarClientes(),
-        error: (err) => console.error('Error al eliminar', err),
-      });
-    }
+  if (confirm('¿Eliminar este cliente?')) {
+    this.clienteService.delete(id).subscribe({
+      next: () => {
+        this.cargarClientes();
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Cliente eliminado correctamente' });
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al eliminar' });
+      },
+    });
   }
+}
 
   onActivoChange(activo: boolean, c: any) {
     const data = {

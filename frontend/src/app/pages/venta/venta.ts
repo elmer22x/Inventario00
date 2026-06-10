@@ -14,6 +14,9 @@ import { VentaService } from '../../services/venta.service';
 import { ClienteService } from '../../services/cliente.service';
 import { ProductoService } from '../../services/producto.service';
 
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+
 @Component({
   selector: 'app-venta',
   standalone: true,
@@ -27,7 +30,9 @@ import { ProductoService } from '../../services/producto.service';
     TooltipModule,
     TagModule,
     SelectModule,
+    ToastModule,
   ],
+  providers: [MessageService],
   templateUrl: './venta.html',
   styleUrl: './venta.css',
 })
@@ -35,6 +40,7 @@ export class Venta implements OnInit {
   private ventaService = inject(VentaService);
   private clienteService = inject(ClienteService);
   private productoService = inject(ProductoService);
+  private messageService = inject(MessageService);
 
   ventas: any[] = [];
   cargando = true;
@@ -207,46 +213,51 @@ export class Venta implements OnInit {
   }
 
   guardarVenta() {
-    if (!this.nuevaVenta.clienteId) {
-      this.errorMsg = 'Seleccione un cliente';
-      return;
-    }
-    if (this.nuevaVenta.detalles.length === 0) {
-      this.errorMsg = 'Agregue al menos un producto';
-      return;
-    }
+  if (!this.nuevaVenta.clienteId) {
+    this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: 'Seleccione un cliente' });
+    return;
+  }
+  if (this.nuevaVenta.detalles.length === 0) {
+    this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: 'Agregue al menos un producto' });
+    return;
+  }
 
-    const data = {
-      clienteId: this.nuevaVenta.clienteId,
-      descuento: this.nuevaVenta.descuento || 0,
-      observacion: this.nuevaVenta.observacion,
-      detalles: this.nuevaVenta.detalles.map((d: any) => ({
-        productoId: d.productoId,
-        cantidad: d.cantidad,
-        precioUnitario: d.precioUnitario,
-      })),
-    };
+  const data = {
+    clienteId: this.nuevaVenta.clienteId,
+    descuento: this.nuevaVenta.descuento || 0,
+    observacion: this.nuevaVenta.observacion,
+    detalles: this.nuevaVenta.detalles.map((d: any) => ({
+      productoId: d.productoId,
+      cantidad: d.cantidad,
+      precioUnitario: d.precioUnitario,
+    })),
+  };
 
-    this.ventaService.create(data).subscribe({
+  this.ventaService.create(data).subscribe({
+    next: () => {
+      this.cargarVentas();
+      this.cerrarFormulario();
+      this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Venta registrada correctamente' });
+    },
+    error: (err) => {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al crear la venta' });
+    },
+  });
+}
+
+  anularVenta(id: number) {
+  if (confirm('¿Anular esta venta? Se revertirá el stock.')) {
+    this.ventaService.anular(id).subscribe({
       next: () => {
         this.cargarVentas();
-        this.cerrarFormulario();
-        this.errorMsg = null;
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Venta anulada correctamente' });
       },
-      error: (err) => {
-        this.errorMsg = err.error?.message || 'Error al crear la venta';
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al anular la venta' });
       },
     });
   }
-
-  anularVenta(id: number) {
-    if (confirm('¿Anular esta venta? Se revertirá el stock.')) {
-      this.ventaService.anular(id).subscribe({
-        next: () => this.cargarVentas(),
-        error: () => console.error('Error al anular'),
-      });
-    }
-  }
+}
 
   getEstadoBadge(estado: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | null | undefined {
     switch (estado) {

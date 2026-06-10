@@ -10,6 +10,9 @@ import { TagModule } from 'primeng/tag';
 
 import { ProveedorService } from '../../services/proveedor.service';
 
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+
 @Component({
   selector: 'app-proveedor',
   standalone: true,
@@ -21,13 +24,15 @@ import { ProveedorService } from '../../services/proveedor.service';
     DialogModule,
     TooltipModule,
     TagModule,
+    ToastModule,
   ],
+  providers: [MessageService],
   templateUrl: './proveedor.html',
   styleUrl: './proveedor.css',
 })
 export class Proveedor implements OnInit {
   private proveedorService = inject(ProveedorService);
-
+  private messageService = inject(MessageService);
   proveedores: any[] = [];
   cargando = true;
   errorMsg: string | null = null;
@@ -162,59 +167,75 @@ export class Proveedor implements OnInit {
   }
 
   guardarProveedor() {
-    if (!this.nuevoProveedor.nombre.trim()) return;
+  if (!this.nuevoProveedor.nombre.trim()) return;
 
-    const data = {
-      nombre: this.nuevoProveedor.nombre.trim(),
-      documento: this.nuevoProveedor.documento.trim() || undefined,
-      telefono: this.nuevoProveedor.telefono.trim() || undefined,
-      direccion: this.nuevoProveedor.direccion.trim() || undefined,
-      email: this.nuevoProveedor.email.trim() || undefined,
-      contacto: this.nuevoProveedor.contacto.trim() || undefined,
-      activo: this.nuevoProveedor.activo,
-    };
+  const data = {
+    nombre: this.nuevoProveedor.nombre.trim(),
+    documento: this.nuevoProveedor.documento.trim() || undefined,
+    telefono: this.nuevoProveedor.telefono.trim() || undefined,
+    direccion: this.nuevoProveedor.direccion.trim() || undefined,
+    email: this.nuevoProveedor.email.trim() || undefined,
+    contacto: this.nuevoProveedor.contacto.trim() || undefined,
+    activo: this.nuevoProveedor.activo,
+  };
 
-    if (this.editando) {
-      this.proveedorService.update(this.nuevoProveedor.id, data).subscribe({
-        next: () => {
-          this.cargarProveedores();
-          this.cerrarFormulario();
-        },
-        error: () => console.error('Error al actualizar'),
-      });
-    } else {
-      this.proveedorService.create(data).subscribe({
-        next: () => {
-          this.cargarProveedores();
-          this.cerrarFormulario();
-        },
-        error: () => console.error('Error al crear'),
-      });
-    }
-  }
-
-  eliminarProveedor(id: number) {
-    if (confirm('¿Eliminar este proveedor?')) {
-      this.proveedorService.delete(id).subscribe({
-        next: () => this.cargarProveedores(),
-        error: () => console.error('Error al eliminar'),
-      });
-    }
-  }
-
-  onActivoChange(activo: boolean, p: any) {
-    const data = {
-      nombre: p.nombre,
-      documento: p.documento,
-      telefono: p.telefono,
-      direccion: p.direccion,
-      email: p.email,
-      contacto: p.contacto,
-      activo: activo,
-    };
-    this.proveedorService.update(p.id, data).subscribe({
-      next: () => this.cargarProveedores(),
-      error: () => console.error('Error al cambiar estado'),
+  if (this.editando) {
+    this.proveedorService.update(this.nuevoProveedor.id, data).subscribe({
+      next: () => {
+        this.cargarProveedores();
+        this.cerrarFormulario();
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Proveedor actualizado correctamente' });
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar' });
+      },
+    });
+  } else {
+    this.proveedorService.create(data).subscribe({
+      next: () => {
+        this.cargarProveedores();
+        this.cerrarFormulario();
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Proveedor creado correctamente' });
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al crear' });
+      },
     });
   }
+}
+
+  eliminarProveedor(id: number) {
+  if (confirm('¿Eliminar este proveedor?')) {
+    this.proveedorService.delete(id).subscribe({
+      next: () => {
+        this.cargarProveedores();
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Proveedor eliminado correctamente' });
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al eliminar' });
+      },
+    });
+  }
+}
+
+  onActivoChange(activo: boolean, p: any) {
+  const data = {
+    nombre: p.nombre,
+    documento: p.documento,
+    telefono: p.telefono,
+    direccion: p.direccion,
+    email: p.email,
+    contacto: p.contacto,
+    activo: activo,
+  };
+  this.proveedorService.update(p.id, data).subscribe({
+    next: () => {
+      this.cargarProveedores();
+      this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Estado del proveedor actualizado' });
+    },
+    error: () => {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al cambiar estado' });
+    },
+  });
+}
 }

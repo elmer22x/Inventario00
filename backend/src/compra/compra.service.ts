@@ -88,7 +88,25 @@ export class CompraService {
 
     const descuento = data.descuento || 0;
     const total = subtotal - descuento;
-    const numero = `COM-${Date.now()}`;
+
+    // Generar número secuencial para compras
+    const lastCompra = await this.compraRepo
+      .createQueryBuilder('c')
+      .orderBy('c.id', 'DESC')
+      .getOne();
+
+    let nuevoNumero = 1;
+    if (lastCompra && lastCompra.numero) {
+      const partes = lastCompra.numero.split('-');
+      if (partes.length === 2) {
+        const ultimoNumero = parseInt(partes[1], 10);
+        if (!isNaN(ultimoNumero)) {
+          nuevoNumero = ultimoNumero + 1;
+        }
+      }
+    }
+
+    const numero = `COM-${nuevoNumero.toString().padStart(4, '0')}`;
 
     const compra = this.compraRepo.create({
       numero,

@@ -14,6 +14,9 @@ import { CompraService } from '../../services/compra.service';
 import { ProveedorService } from '../../services/proveedor.service';
 import { ProductoService } from '../../services/producto.service';
 
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+
 @Component({
   selector: 'app-compra',
   standalone: true,
@@ -27,7 +30,9 @@ import { ProductoService } from '../../services/producto.service';
     TooltipModule,
     TagModule,
     SelectModule,
+    ToastModule,
   ],
+  providers: [MessageService],
   templateUrl: './compra.html',
   styleUrl: './compra.css',
 })
@@ -35,6 +40,7 @@ export class Compra implements OnInit {
   private compraService = inject(CompraService);
   private proveedorService = inject(ProveedorService);
   private productoService = inject(ProductoService);
+  private messageService = inject(MessageService);
 
   compras: any[] = [];
   cargando = true;
@@ -205,46 +211,51 @@ export class Compra implements OnInit {
   }
 
   guardarCompra() {
-    if (!this.nuevaCompra.proveedorId) {
-      this.errorMsg = 'Seleccione un proveedor';
-      return;
-    }
-    if (this.nuevaCompra.detalles.length === 0) {
-      this.errorMsg = 'Agregue al menos un producto';
-      return;
-    }
+  if (!this.nuevaCompra.proveedorId) {
+    this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: 'Seleccione un proveedor' });
+    return;
+  }
+  if (this.nuevaCompra.detalles.length === 0) {
+    this.messageService.add({ severity: 'warn', summary: 'Advertencia', detail: 'Agregue al menos un producto' });
+    return;
+  }
 
-    const data = {
-      proveedorId: this.nuevaCompra.proveedorId,
-      descuento: this.nuevaCompra.descuento || 0,
-      observacion: this.nuevaCompra.observacion,
-      detalles: this.nuevaCompra.detalles.map((d: any) => ({
-        productoId: d.productoId,
-        cantidad: d.cantidad,
-        precioUnitario: d.precioUnitario,
-      })),
-    };
+  const data = {
+    proveedorId: this.nuevaCompra.proveedorId,
+    descuento: this.nuevaCompra.descuento || 0,
+    observacion: this.nuevaCompra.observacion,
+    detalles: this.nuevaCompra.detalles.map((d: any) => ({
+      productoId: d.productoId,
+      cantidad: d.cantidad,
+      precioUnitario: d.precioUnitario,
+    })),
+  };
 
-    this.compraService.create(data).subscribe({
+  this.compraService.create(data).subscribe({
+    next: () => {
+      this.cargarCompras();
+      this.cerrarFormulario();
+      this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Compra registrada correctamente' });
+    },
+    error: (err) => {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error?.message || 'Error al crear la compra' });
+    },
+  });
+}
+
+  anularCompra(id: number) {
+  if (confirm('¿Anular esta compra? Se revertirá el stock.')) {
+    this.compraService.anular(id).subscribe({
       next: () => {
         this.cargarCompras();
-        this.cerrarFormulario();
-        this.errorMsg = null;
+        this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Compra anulada correctamente' });
       },
-      error: (err) => {
-        this.errorMsg = err.error?.message || 'Error al crear la compra';
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al anular la compra' });
       },
     });
   }
-
-  anularCompra(id: number) {
-    if (confirm('¿Anular esta compra? Se revertirá el stock.')) {
-      this.compraService.anular(id).subscribe({
-        next: () => this.cargarCompras(),
-        error: () => console.error('Error al anular'),
-      });
-    }
-  }
+}
 
   getEstadoBadge(estado: string): 'success' | 'info' | 'danger' | 'warn' | 'secondary' | 'contrast' | null | undefined {
     switch (estado) {

@@ -91,7 +91,24 @@ export class VentaService {
     const descuento = data.descuento || 0;
     const total = subtotal - descuento;
 
-    const numero = `VEN-${Date.now()}`;
+    // Generar número secuencial corregido
+    const lastVenta = await this.ventaRepo
+      .createQueryBuilder('v')
+      .orderBy('v.id', 'DESC')
+      .getOne();
+
+    let nuevoNumero = 1;
+    if (lastVenta && lastVenta.numero) {
+      const partes = lastVenta.numero.split('-');
+      if (partes.length === 2) {
+        const ultimoNumero = parseInt(partes[1], 10);
+        if (!isNaN(ultimoNumero)) {
+          nuevoNumero = ultimoNumero + 1;
+        }
+      }
+    }
+
+    const numero = `VEN-${nuevoNumero.toString().padStart(4, '0')}`;
 
     const venta = this.ventaRepo.create({
       numero,
